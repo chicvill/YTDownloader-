@@ -5,9 +5,9 @@ FROM python:3.11-slim
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Install system dependencies (FFmpeg is required for yt-dlp)
+# Install system dependencies (FFmpeg and Node.js are required for yt-dlp)
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get install -y --no-install-recommends ffmpeg nodejs && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
