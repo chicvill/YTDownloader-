@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+venv/
+ENV/
+
+# Downloads
+downloads/
+*.mp4
+*.m4a
+*.webm
+*.part
+*.mkv
+*.mp3
+
+# YT-DLP / Cookies
+cookies.txt
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# Environment
+.env
+
+# VS Code
+.vscode/
