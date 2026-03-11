@@ -29,6 +29,16 @@ def setup_environment():
         print("--- Windows Environment Setup Complete ---")
     else:
         print("--- Linux/Docker Environment Detected ---")
+        # Render/Docker 환경: 환경 변수에서 쿠키를 읽어와 파일로 저장
+        cookies_content = os.environ.get('COOKIES_CONTENT')
+        if cookies_content:
+            try:
+                cookies_path = os.path.join(base_dir, 'cookies.txt')
+                with open(cookies_path, 'w', encoding='utf-8') as f:
+                    f.write(cookies_content)
+                print("--- Cookies written from environment variable ---")
+            except Exception as e:
+                print(f"Failed to write cookies from env: {str(e)}")
 
     print(f"FFmpeg found: {shutil.which('ffmpeg')}")
     print(f"Node found: {shutil.which('node')}")
@@ -58,6 +68,13 @@ def download():
             'outtmpl': os.path.join(downloads_folder, f'%(title)s{unique_suffix}.%(ext)s'),
             'noplaylist': True,
             'ignoreerrors': False, # 에러 발생 시 즉시 catch하여 fallback 시도
+            # 클라우드 환경(Render) 봇 탐지 우회: 모바일 클라이언트 우선순위 상향
+            'extractor_args': {
+                'youtube': {
+                    'player_client': ['android', 'ios', 'web_embedded'],
+                    'player_skip': ['web'], # 일반 웹 클라이언트는 봇 탐지가 심해 스킵
+                }
+            }
         }
 
         # 쿠키 파일 경로
