@@ -34,11 +34,19 @@ def setup_environment():
         if cookies_content:
             try:
                 cookies_path = os.path.join(base_dir, 'cookies.txt')
+                # 기존 파일 있으면 삭제 후 재생성 (갱신 보장)
+                if os.path.exists(cookies_path):
+                    os.remove(cookies_path)
+                
                 with open(cookies_path, 'w', encoding='utf-8') as f:
                     f.write(cookies_content)
-                print("--- Cookies written from environment variable ---")
+                
+                file_size = os.path.getsize(cookies_path)
+                print(f"--- Cookies written from environment variable (Size: {file_size} bytes) ---")
             except Exception as e:
                 print(f"Failed to write cookies from env: {str(e)}")
+        else:
+            print("--- No COOKIES_CONTENT environment variable found ---")
 
     print(f"FFmpeg found: {shutil.which('ffmpeg')}")
     print(f"Node found: {shutil.which('node')}")
@@ -99,7 +107,8 @@ def download():
         # 1차 시도: 쿠키 포함 (있을 경우)
         if has_cookies:
             try:
-                print("--- Attempt 1: Using cookies.txt ---")
+                file_size = os.path.getsize(cookies_file)
+                print(f"--- Attempt 1: Using cookies.txt (Size: {file_size} bytes) ---")
                 opts_with_cookies = ydl_opts.copy()
                 opts_with_cookies['cookiefile'] = cookies_file
                 with yt_dlp.YoutubeDL(opts_with_cookies) as ydl:
