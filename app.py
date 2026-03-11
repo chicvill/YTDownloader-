@@ -48,8 +48,15 @@ def setup_environment():
         else:
             print("--- No COOKIES_CONTENT environment variable found ---")
 
+    print(f"yt-dlp version: {yt_dlp.version.__version__}")
     print(f"FFmpeg found: {shutil.which('ffmpeg')}")
-    print(f"Node found: {shutil.which('node')}")
+    
+    node_path = shutil.which('node')
+    print(f"Node found: {node_path}")
+    if node_path:
+        os.system("node -v")
+    else:
+        print("--- WARNING: Node.js not found in system PATH! ---")
 
 setup_environment()
 
@@ -76,12 +83,17 @@ def download():
             'outtmpl': os.path.join(downloads_folder, f'%(title)s{unique_suffix}.%(ext)s'),
             'noplaylist': True,
             'ignoreerrors': False, # 에러 발생 시 즉시 catch하여 fallback 시도
-            # 클라우드 환경(Render) 봇 탐지 우회: 모바일 클라이언트 우선순위 상향
+            # 클라우드 환경(Render) 봇 탐지 우회 강화
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['android', 'ios', 'web_embedded'],
-                    'player_skip': ['web'], # 일반 웹 클라이언트는 봇 탐지가 심해 스킵
+                    'player_client': ['android', 'ios', 'web_embedded', 'mweb'],
+                    'player_skip': ['web', 'web_embedded_player'], # 봇 탐지가 심한 클라이언트 대폭 스킵
                 }
+            },
+            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', # 고정된 User-Agent로 일관성 유지
+            'http_headers': {
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-us,ko-kr;q=0.7,en;q=0.3',
             }
         }
 
