@@ -34,29 +34,14 @@ def setup_environment():
         if cookies_content:
             try:
                 cookies_path = os.path.join(base_dir, 'cookies.txt')
-                # 기존 파일 있으면 삭제 후 재생성 (갱신 보장)
-                if os.path.exists(cookies_path):
-                    os.remove(cookies_path)
-                
                 with open(cookies_path, 'w', encoding='utf-8') as f:
                     f.write(cookies_content)
-                
-                file_size = os.path.getsize(cookies_path)
-                print(f"--- Cookies written from environment variable (Size: {file_size} bytes) ---")
+                print("--- Cookies written from environment variable ---")
             except Exception as e:
                 print(f"Failed to write cookies from env: {str(e)}")
-        else:
-            print("--- No COOKIES_CONTENT environment variable found ---")
 
-    print(f"yt-dlp version: {yt_dlp.version.__version__}")
     print(f"FFmpeg found: {shutil.which('ffmpeg')}")
-    
-    node_path = shutil.which('node')
-    print(f"Node found: {node_path}")
-    if node_path:
-        os.system("node -v")
-    else:
-        print("--- WARNING: Node.js not found in system PATH! ---")
+    print(f"Node found: {shutil.which('node')}")
 
 setup_environment()
 
@@ -83,17 +68,12 @@ def download():
             'outtmpl': os.path.join(downloads_folder, f'%(title)s{unique_suffix}.%(ext)s'),
             'noplaylist': True,
             'ignoreerrors': False, # 에러 발생 시 즉시 catch하여 fallback 시도
-            # 클라우드 환경(Render) 봇 탐지 우회 강화
+            # 클라우드 환경(Render) 봇 탐지 우회: 모바일 클라이언트 우선순위 상향
             'extractor_args': {
                 'youtube': {
-                    'player_client': ['android', 'ios', 'web_embedded', 'mweb'],
-                    'player_skip': ['web', 'web_embedded_player'], # 봇 탐지가 심한 클라이언트 대폭 스킵
+                    'player_client': ['android', 'ios', 'web_embedded'],
+                    'player_skip': ['web'], # 일반 웹 클라이언트는 봇 탐지가 심해 스킵
                 }
-            },
-            'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36', # 고정된 User-Agent로 일관성 유지
-            'http_headers': {
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-us,ko-kr;q=0.7,en;q=0.3',
             }
         }
 
@@ -119,8 +99,7 @@ def download():
         # 1차 시도: 쿠키 포함 (있을 경우)
         if has_cookies:
             try:
-                file_size = os.path.getsize(cookies_file)
-                print(f"--- Attempt 1: Using cookies.txt (Size: {file_size} bytes) ---")
+                print("--- Attempt 1: Using cookies.txt ---")
                 opts_with_cookies = ydl_opts.copy()
                 opts_with_cookies['cookiefile'] = cookies_file
                 with yt_dlp.YoutubeDL(opts_with_cookies) as ydl:
